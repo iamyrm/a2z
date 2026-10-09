@@ -16,7 +16,9 @@
 
   const $ = (s) => document.querySelector(s);
 
-  const FILE = (location.pathname.split("/").pop() || "index.html").toLowerCase();
+  const FILE = (
+    location.pathname.split("/").pop() || "index.html"
+  ).toLowerCase();
   const ARCHIVE = FILE !== "catalogue.html";
   const PER_PAGE = ARCHIVE ? 12 : 10;
 
@@ -113,7 +115,8 @@
   function matches(it) {
     if (state.category.length && state.category.indexOf(it.cat) === -1)
       return false;
-    if (state.brand.length && state.brand.indexOf(it.brand) === -1) return false;
+    if (state.brand.length && state.brand.indexOf(it.brand) === -1)
+      return false;
     if (state.type.length && state.type.indexOf(it.type) === -1) return false;
     if (state.price && !(PRICE_BANDS[state.price] || (() => true))(it.price))
       return false;

@@ -208,13 +208,11 @@
       if (isOpen && e.key === "Enter") {
         const q = input.value.trim();
         if (q)
-          window.location.href =
-            "category.html?q=" + encodeURIComponent(q);
+          window.location.href = "category.html?q=" + encodeURIComponent(q);
       }
     });
 
-    if (input)
-      input.addEventListener("input", () => filter(input.value));
+    if (input) input.addEventListener("input", () => filter(input.value));
 
     function isTyping(el) {
       return (

@@ -39,7 +39,5 @@
   main.addEventListener("click", () => {
     main.classList.toggle("is-zoomed");
   });
-  main.addEventListener("mouseleave", () =>
-    main.classList.remove("is-zoomed"),
-  );
+  main.addEventListener("mouseleave", () => main.classList.remove("is-zoomed"));
 })();

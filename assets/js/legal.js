@@ -18,7 +18,9 @@
   }
 
   function boot() {
-    const sections = Array.from(document.querySelectorAll(".legal__body section[id]"));
+    const sections = Array.from(
+      document.querySelectorAll(".legal__body section[id]"),
+    );
     const toc = document.querySelector(".legal__toc");
     if (!sections.length || !toc) return;
 
