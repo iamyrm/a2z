@@ -702,6 +702,7 @@ a:hover .media::before,
   padding-inline: var(--gutter);
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: clamp(16px, 3vw, 56px);
 }
 
@@ -747,6 +748,18 @@ a:hover .media::before,
   gap: 2px;
   padding-left: 14px;
   border-left: 1px solid var(--line-2);
+}
+
+
+@media (max-width: 374px) {
+  .brand__mark {
+    display: none;
+  }
+
+  .brand__meta {
+    padding-left: 0px;
+    border-left: none;
+  }
 }
 
 .brand__name {
