@@ -1,0 +1,25 @@
+{
+  "name": "A2Z Riders Hub — Motorcycle Gear Catalogue",
+  "short_name": "A2Z Riders Hub",
+  "description": "Premium motorcycle gear and riding equipment catalogue in Biratnagar, Nepal.",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0b0b",
+  "theme_color": "#0b0b0b",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "assets/images/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/images/logo.png",
+      "sizes": "500x480",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

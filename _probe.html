@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>probe</title>
+</head>
+
+<body>
+  <pre id="out">running</pre>
+  <script>
+    const CASES = [
+      { url: "index.html", w: 320, h: 700 },
+      { url: "index.html", w: 360, h: 740 },
+      { url: "index.html", w: 414, h: 800 },
+      { url: "index.html", w: 600, h: 800 },
+      { url: "index.html", w: 768, h: 900 },
+      { url: "index.html", w: 899, h: 800 },
+      { url: "index.html", w: 900, h: 800 },
+      { url: "index.html", w: 1180, h: 800 },
+      { url: "page-product.html", w: 390, h: 844 },
+      { url: "page-product.html", w: 768, h: 900 },
+      { url: "page-product.html", w: 1280, h: 900 }
+    ];
+
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    function rect(el) {
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      return { t: Math.round(r.top), l: Math.round(r.left), r: Math.round(r.right), b: Math.round(r.bottom), w: Math.round(r.width), h: Math.round(r.height) };
+    }
+
+    async function measure(c) {
+      const f = document.createElement("iframe");
+      f.style.cssText = "width:" + c.w + "px;height:" + c.h + "px;border:0;position:absolute;left:0;top:0;visibility:hidden";
+      f.src = c.url;
+      document.body.appendChild(f);
+      await new Promise((res) => { f.onload = res; });
+      await wait(600);
+
+      const d = f.contentDocument, w = f.contentWindow;
+      const out = { case: c.url + " @" + c.w, docScrollW: d.documentElement.scrollWidth, docClientW: d.documentElement.clientWidth };
+
+      const header = d.querySelector(".site-header");
+      const brand = d.querySelector(".brand");
+      const actions = d.querySelector(".header-actions");
+      const toggle = d.querySelector(".menu-toggle");
+      const nav = d.querySelector(".nav");
+      out.header = rect(header);
+      out.headerH = header ? Math.round(w.getComputedStyle(header).height) : null;
+      out.headerZ = header ? w.getComputedStyle(header).zIndex : null;
+      out.brand = rect(brand);
+      out.actions = rect(actions);
+      out.toggle = rect(toggle);
+      out.toggleDisplay = toggle ? w.getComputedStyle(toggle).display : null;
+      out.navDisplay = nav ? w.getComputedStyle(nav).display : null;
+      if (out.brand && out.actions) out.headerOverlap = out.brand.r > out.actions.l;
+
+      /* open the drawer and inspect */
+      if (toggle && w.getComputedStyle(toggle).display !== "none") {
+        toggle.click();
+        await wait(900);
+        const drawer = d.querySelector(".drawer");
+        out.drawer = {
+          rect: rect(drawer),
+          scrollH: drawer ? drawer.scrollHeight : null,
+          clientH: drawer ? drawer.clientHeight : null,
+          zIndex: drawer ? w.getComputedStyle(drawer).zIndex : null,
+          bodyLocked: d.body.classList.contains("is-locked"),
+          menuOpen: d.body.classList.contains("menu-open")
+        };
+        const top = d.querySelector(".drawer__top");
+        const navD = d.querySelector(".drawer__nav");
+        const foot = d.querySelector(".drawer__foot");
+        out.drawerTop = rect(top);
+        out.drawerNav = rect(navD);
+        out.drawerFoot = rect(foot);
+        const navLink = d.querySelector(".drawer__nav a");
+        if (navLink) {
+          const cs = w.getComputedStyle(navLink);
+          out.drawerLink = { fs: cs.fontSize, pad: cs.paddingTop, opacity: cs.opacity };
+        }
+        /* is the header toggle covered by the drawer? */
+        if (out.toggle) {
+          const hit = d.elementFromPoint(out.toggle.l + out.toggle.w / 2, out.toggle.t + out.toggle.h / 2);
+          out.toggleHit = hit ? (hit.className && hit.className.baseVal !== undefined ? "svg" : hit.tagName + "." + hit.className) : null;
+        }
+        /* does drawer content fit? */
+        out.drawerOverflow = out.drawer.scrollH > c.h + 1;
+        toggle.click();
+        await wait(400);
+      }
+
+      /* page-product specifics */
+      const pdp = d.querySelector(".pdp");
+      if (pdp) {
+        const crumbs = d.querySelector(".pdp__crumbs");
+        out.pdpTop = rect(pdp).t;
+        out.crumbsTop = crumbs ? rect(crumbs).t : null;
+        out.headerBottom = out.header ? out.header.b : null;
+        out.crumbsUnderHeader = out.crumbsTop !== null && out.header ? out.crumbsTop < out.header.b : null;
+        const gallery = d.querySelector(".gallery");
+        if (gallery) out.galleryPosition = w.getComputedStyle(gallery).position;
+        const mainImg = d.querySelector("#gallery-main img");
+        const thumbs = d.querySelectorAll(".gallery__thumb");
+        if (mainImg && thumbs.length > 1) {
+          const before = mainImg.currentSrc;
+          thumbs[1].click();
+          await wait(700);
+          const after = mainImg.currentSrc;
+          out.gallerySwap = { changed: before !== after, before: before.slice(-40), after: after.slice(-40), src: (mainImg.getAttribute("src") || "").slice(-40), hasSrcset: !!mainImg.getAttribute("srcset") };
+          thumbs[1].click();
+          await wait(400);
+        }
+      }
+
+      f.remove();
+      return out;
+    }
+
+    (async () => {
+      const res = [];
+      for (const c of CASES) {
+        try { res.push(await measure(c)); }
+        catch (e) { res.push({ case: c.url + " @" + c.w, error: String(e) }); }
+      }
+      document.getElementById("out").textContent = JSON.stringify(res, null, 1);
+    })();
+  </script>
+</body>
+
+</html>
